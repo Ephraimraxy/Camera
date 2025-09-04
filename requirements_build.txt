@@ -1,0 +1,18 @@
+# Core application requirements
+dlib
+numpy
+scikit-image
+pandas
+opencv-python
+flask
+pyttsx3
+
+# Building and packaging requirements
+pyinstaller>=5.0
+auto-py-to-exe
+cx-freeze
+py2exe
+
+# Optional: For creating installers
+# nsis (download from https://nsis.sourceforge.io/)
+# innosetup (download from https://jrsoftware.org/isinfo.php)
