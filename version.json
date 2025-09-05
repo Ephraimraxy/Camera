@@ -1,0 +1,13 @@
+{
+  "version": "1.0.1",
+  "build_date": "2025-09-05 00:00:00",
+  "last_updated": "2025-09-05T00:00:00",
+  "download_url": "https://github.com/Ephraimraxy/Camera/releases/download/v1.0.1/FaceAttendanceSystem_Installer.exe",
+  "changelog": "Version 1.0.0 - Initial Release\n\nFeatures:\n• Professional GUI with modern interface\n• Face registration and recognition\n• Automated attendance tracking\n• Web-based dashboard\n• Auto-update system\n• Database management\n• Department and position tracking\n\nImprovements:\n• Enhanced user experience\n• Better error handling\n• Improved performance\n• Professional styling",
+  "requirements": {
+    "min_version": "1.0.0",
+    "python_version": "3.8+",
+    "os": ["windows", "linux", "macos"]
+  },
+  "release_notes": "Minor update with installer packaging and auto-update wiring (v1.0.1)."
+}
