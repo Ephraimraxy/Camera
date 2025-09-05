@@ -78,13 +78,17 @@
             <thead>
                 <tr>
                     <th scope="col">Name</th>
+                    <th scope="col">Department</th>
+                    <th scope="col">Position</th>
                     <th scope="col">Time</th>
                 </tr>
             </thead>
             <tbody>
-                {% for name, time in attendance_data %}
+                {% for name, department, position, time in attendance_data %}
                 <tr>
                     <td>{{ name }}</td>
+                    <td>{{ department if department else 'N/A' }}</td>
+                    <td>{{ position if position else 'N/A' }}</td>
                     <td>{{ time }}</td>
                 </tr>
                 {% endfor %}

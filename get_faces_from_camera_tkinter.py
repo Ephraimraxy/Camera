@@ -40,6 +40,10 @@ class Face_Register:
         self.label_fps_info = tk.Label(self.frame_right_info, text="")
         self.input_name = tk.Entry(self.frame_right_info)
         self.input_name_char = ""
+        self.input_department = tk.Entry(self.frame_right_info)
+        self.input_department_char = ""
+        self.input_position = tk.Entry(self.frame_right_info)
+        self.input_position_char = ""
         self.label_warning = tk.Label(self.frame_right_info)
         self.label_face_cnt = tk.Label(self.frame_right_info, text="Faces in current frame: ")
         self.log_all = tk.Label(self.frame_right_info)
@@ -96,12 +100,16 @@ class Face_Register:
 
     def GUI_get_input_name(self):
         self.input_name_char = self.input_name.get()
+        self.input_department_char = self.input_department.get()
+        self.input_position_char = self.input_position.get()
         self.create_face_folder()
         self.label_cnt_face_in_database['text'] = str(self.existing_faces_cnt)
         # Announce input name and folder creation
         if self.tts_engine and self.input_name_char:
             try:
-                self.tts_engine.say(f"Registering {self.input_name_char}. Folder created successfully.")
+                dept_info = f" from {self.input_department_char}" if self.input_department_char else ""
+                pos_info = f", {self.input_position_char}" if self.input_position_char else ""
+                self.tts_engine.say(f"Registering {self.input_name_char}{dept_info}{pos_info}. Folder created successfully.")
                 self.tts_engine.runAndWait()
             except Exception:
                 pass
@@ -131,29 +139,35 @@ class Face_Register:
                   text='Clear',
                   command=self.GUI_clear_data).grid(row=6, column=0, columnspan=3, sticky=tk.W, padx=5, pady=2)
 
-        # Step 2: Input name and create folders for face
+        # Step 2: Input name, department, position and create folders for face
         tk.Label(self.frame_right_info,
                  font=self.font_step_title,
-                 text="Step 2: Input name").grid(row=7, column=0, columnspan=2, sticky=tk.W, padx=5, pady=20)
+                 text="Step 2: Input person details").grid(row=7, column=0, columnspan=2, sticky=tk.W, padx=5, pady=20)
 
         tk.Label(self.frame_right_info, text="Name: ").grid(row=8, column=0, sticky=tk.W, padx=5, pady=0)
         self.input_name.grid(row=8, column=1, sticky=tk.W, padx=0, pady=2)
 
+        tk.Label(self.frame_right_info, text="Department: ").grid(row=9, column=0, sticky=tk.W, padx=5, pady=0)
+        self.input_department.grid(row=9, column=1, sticky=tk.W, padx=0, pady=2)
+
+        tk.Label(self.frame_right_info, text="Position: ").grid(row=10, column=0, sticky=tk.W, padx=5, pady=0)
+        self.input_position.grid(row=10, column=1, sticky=tk.W, padx=0, pady=2)
+
         tk.Button(self.frame_right_info,
                   text='Input',
-                  command=self.GUI_get_input_name).grid(row=8, column=2, padx=5)
+                  command=self.GUI_get_input_name).grid(row=11, column=0, columnspan=2, padx=5, pady=10)
 
         # Step 3: Save current face in frame
         tk.Label(self.frame_right_info,
                  font=self.font_step_title,
-                 text="Step 3: Save face image").grid(row=9, column=0, columnspan=2, sticky=tk.W, padx=5, pady=20)
+                 text="Step 3: Save face image").grid(row=12, column=0, columnspan=2, sticky=tk.W, padx=5, pady=20)
 
         tk.Button(self.frame_right_info,
                   text='Save current face',
-                  command=self.save_current_face).grid(row=10, column=0, columnspan=3, sticky=tk.W)
+                  command=self.save_current_face).grid(row=13, column=0, columnspan=3, sticky=tk.W)
 
         # Show log in GUI
-        self.log_all.grid(row=11, column=0, columnspan=20, sticky=tk.W, padx=5, pady=20)
+        self.log_all.grid(row=14, column=0, columnspan=20, sticky=tk.W, padx=5, pady=20)
 
         self.frame_right_info.pack()
 
@@ -197,9 +211,12 @@ class Face_Register:
         #  Create the folders for saving faces
         self.existing_faces_cnt += 1
         if self.input_name_char:
+            # Include department and position in folder name
+            dept_part = f"_{self.input_department_char}" if self.input_department_char else ""
+            pos_part = f"_{self.input_position_char}" if self.input_position_char else ""
             self.current_face_dir = self.path_photos_from_camera + \
                                     "person_" + str(self.existing_faces_cnt) + "_" + \
-                                    self.input_name_char
+                                    self.input_name_char + dept_part + pos_part
         else:
             self.current_face_dir = self.path_photos_from_camera + \
                                     "person_" + str(self.existing_faces_cnt)

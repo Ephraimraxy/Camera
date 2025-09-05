@@ -26,7 +26,7 @@ cursor = conn.cursor()
 # Create a table for the current date
 current_date = datetime.datetime.now().strftime("%Y_%m_%d")  # Replace hyphens with underscores
 table_name = "attendance" 
-create_table_sql = f"CREATE TABLE IF NOT EXISTS {table_name} (name TEXT, time TEXT, date DATE, UNIQUE(name, date))"
+create_table_sql = f"CREATE TABLE IF NOT EXISTS {table_name} (name TEXT, department TEXT, position TEXT, time TEXT, date DATE, UNIQUE(name, date))"
 cursor.execute(create_table_sql)
 
 
@@ -53,6 +53,9 @@ class Face_Recognizer:
         self.face_features_known_list = []
         # / Save the name of faces in the database
         self.face_name_known_list = []
+        # Save department and position information
+        self.face_department_known_list = []
+        self.face_position_known_list = []
 
         #  List to save centroid positions of ROI in frame N-1 and N
         self.last_frame_face_centroid_list = []
@@ -94,8 +97,11 @@ class Face_Recognizer:
             csv_rd = pd.read_csv(path_features_known_csv, header=None)
             for i in range(csv_rd.shape[0]):
                 features_someone_arr = []
+                # New CSV structure: name, department, position, then 128 features
                 self.face_name_known_list.append(csv_rd.iloc[i][0])
-                for j in range(1, 129):
+                self.face_department_known_list.append(csv_rd.iloc[i][1])
+                self.face_position_known_list.append(csv_rd.iloc[i][2])
+                for j in range(3, 131):  # Start from index 3 for features
                     if csv_rd.iloc[i][j] == '':
                         features_someone_arr.append('0')
                     else:
@@ -164,7 +170,7 @@ class Face_Recognizer:
                                  cv2.LINE_AA)
     # insert data in database
 
-    def attendance(self, name):
+    def attendance(self, name, department="", position=""):
         current_date = datetime.datetime.now().strftime('%Y-%m-%d')
         conn = sqlite3.connect("attendance.db")
         cursor = conn.cursor()
@@ -183,12 +189,15 @@ class Face_Recognizer:
                     pass
         else:
             current_time = datetime.datetime.now().strftime('%H:%M:%S')
-            cursor.execute("INSERT INTO attendance (name, time, date) VALUES (?, ?, ?)", (name, current_time, current_date))
+            cursor.execute("INSERT INTO attendance (name, department, position, time, date) VALUES (?, ?, ?, ?, ?)", 
+                          (name, department, position, current_time, current_date))
             conn.commit()
-            print(f"{name} marked as present for {current_date} at {current_time}")
+            print(f"{name} ({department}, {position}) marked as present for {current_date} at {current_time}")
             if self.tts_engine:
                 try:
-                    self.tts_engine.say(f"{name} present at {current_time}")
+                    dept_info = f" from {department}" if department else ""
+                    pos_info = f", {position}" if position else ""
+                    self.tts_engine.say(f"{name}{dept_info}{pos_info} present at {current_time}")
                     self.tts_engine.runAndWait()
                 except Exception:
                     pass
@@ -312,12 +321,14 @@ class Face_Recognizer:
                                 logging.debug("  Face recognition result: %s",
                                               self.face_name_known_list[similar_person_num])
                                 
-                                # Insert attendance record
-                                nam =self.face_name_known_list[similar_person_num]
+                                # Insert attendance record with department and position
+                                nam = self.face_name_known_list[similar_person_num]
+                                dept = self.face_department_known_list[similar_person_num]
+                                pos = self.face_position_known_list[similar_person_num]
 
                                 print(type(self.face_name_known_list[similar_person_num]))
                                 print(nam)
-                                self.attendance(nam)
+                                self.attendance(nam, dept, pos)
                             else:
                                 logging.debug("  Face recognition result: Unknown person")
                                 if self.tts_engine:

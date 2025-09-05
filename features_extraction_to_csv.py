@@ -77,14 +77,22 @@ def main():
             logging.info("%sperson_%s", path_images_from_camera, person)
             features_mean_personX = return_features_mean_personX(path_images_from_camera + person)
 
-            if len(person.split('_', 2)) == 2:
-                # "person_x"
-                person_name = person
+            # Parse person folder name to extract name, department, and position
+            parts = person.split('_')
+            if len(parts) >= 2:
+                person_name = parts[2] if len(parts) > 2 else "Unknown"
+                department = parts[3] if len(parts) > 3 else ""
+                position = parts[4] if len(parts) > 4 else ""
             else:
-                # "person_x_tom"
-                person_name = person.split('_', 2)[-1]
-            features_mean_personX = np.insert(features_mean_personX, 0, person_name, axis=0)
-            # features_mean_personX will be 129D, person name + 128 features
+                person_name = person
+                department = ""
+                position = ""
+            
+            # Insert name, department, position, then 128 features
+            features_mean_personX = np.insert(features_mean_personX, 0, position, axis=0)  # position first
+            features_mean_personX = np.insert(features_mean_personX, 0, department, axis=0)  # department second
+            features_mean_personX = np.insert(features_mean_personX, 0, person_name, axis=0)  # name third
+            # features_mean_personX will be 131D: name + department + position + 128 features
             writer.writerow(features_mean_personX)
             logging.info('\n')
         logging.info("Save all the features of faces registered into: data/features_all.csv")

@@ -5,3 +5,6 @@ pandas
 opencv-python
 flask
 pyttsx3
+requests
+pyinstaller
+Pillow

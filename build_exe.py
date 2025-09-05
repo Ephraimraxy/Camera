@@ -23,6 +23,71 @@ def install_pyinstaller():
 def create_spec_files():
     """Create PyInstaller spec files for each component"""
     
+    # Main application spec
+    main_app_spec = """
+# -*- mode: python ; coding: utf-8 -*-
+
+block_cipher = None
+
+a = Analysis(
+    ['main_application.py'],
+    pathex=[],
+    binaries=[],
+    datas=[
+        ('data', 'data'),
+        ('templates', 'templates'),
+        ('version.json', '.'),
+        ('attendance.db', '.'),
+    ],
+    hiddenimports=[
+        'tkinter',
+        'tkinter.ttk',
+        'tkinter.messagebox',
+        'requests',
+        'threading',
+        'subprocess',
+        'webbrowser',
+        'json',
+        'datetime',
+        'os',
+        'sys'
+    ],
+    hookspath=[],
+    hooksconfig={},
+    runtime_hooks=[],
+    excludes=[],
+    win_no_prefer_redirects=False,
+    win_private_assemblies=False,
+    cipher=block_cipher,
+    noarchive=False,
+)
+
+pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
+
+exe = EXE(
+    pyz,
+    a.scripts,
+    a.binaries,
+    a.zipfiles,
+    a.datas,
+    [],
+    name='FaceAttendanceSystem',
+    debug=False,
+    bootloader_ignore_signals=False,
+    strip=False,
+    upx=True,
+    upx_exclude=[],
+    runtime_tmpdir=None,
+    console=False,
+    disable_windowed_traceback=False,
+    argv_emulation=False,
+    target_arch=None,
+    codesign_identity=None,
+    entitlements_file=None,
+    icon='icon.ico'
+)
+"""
+
     # Main attendance taker spec
     attendance_spec = """
 # -*- mode: python ; coding: utf-8 -*-
@@ -81,7 +146,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='icon.ico'  # Add your icon file here
+    icon='icon.ico'
 )
 """
     
@@ -202,6 +267,9 @@ exe = EXE(
 """
     
     # Write spec files
+    with open('main_application.spec', 'w') as f:
+        f.write(main_app_spec)
+    
     with open('attendance_taker.spec', 'w') as f:
         f.write(attendance_spec)
     
@@ -219,6 +287,7 @@ def build_executables():
     
     # Build each component
     components = [
+        ('main_application.spec', 'FaceAttendanceSystem'),
         ('attendance_taker.spec', 'AttendanceTaker'),
         ('face_registration.spec', 'FaceRegistration'),
         ('web_dashboard.spec', 'AttendanceDashboard')
@@ -246,31 +315,35 @@ echo   Face Recognition Attendance System
 echo ========================================
 echo.
 echo Choose an option:
-echo 1. Register New Faces
-echo 2. Take Attendance
-echo 3. View Attendance Dashboard
-echo 4. Extract Features (Run after registering faces)
-echo 5. Exit
+echo 1. Main Application (Recommended)
+echo 2. Register New Faces
+echo 3. Take Attendance
+echo 4. View Attendance Dashboard
+echo 5. Extract Features (Run after registering faces)
+echo 6. Exit
 echo.
-set /p choice="Enter your choice (1-5): "
+set /p choice="Enter your choice (1-6): "
 
 if "%choice%"=="1" (
+    echo Starting Main Application...
+    start "" "dist\\FaceAttendanceSystem\\FaceAttendanceSystem.exe"
+) else if "%choice%"=="2" (
     echo Starting Face Registration...
     start "" "dist\\FaceRegistration\\FaceRegistration.exe"
-) else if "%choice%"=="2" (
+) else if "%choice%"=="3" (
     echo Starting Attendance Taker...
     start "" "dist\\AttendanceTaker\\AttendanceTaker.exe"
-) else if "%choice%"=="3" (
+) else if "%choice%"=="4" (
     echo Starting Web Dashboard...
     start "" "dist\\AttendanceDashboard\\AttendanceDashboard.exe"
     echo Opening web browser...
     timeout /t 3
     start http://localhost:5000
-) else if "%choice%"=="4" (
+) else if "%choice%"=="5" (
     echo Extracting features...
     python features_extraction_to_csv.py
     pause
-) else if "%choice%"=="5" (
+) else if "%choice%"=="6" (
     exit
 ) else (
     echo Invalid choice. Please try again.
@@ -379,7 +452,8 @@ def main():
     print("3. Run: makensis installer.nsi")
     print("4. Distribute the installer to users")
     print("\nFiles created:")
-    print("- dist/AttendanceTaker/ (Main attendance system)")
+    print("- dist/FaceAttendanceSystem/ (Main professional application)")
+    print("- dist/AttendanceTaker/ (Standalone attendance system)")
     print("- dist/FaceRegistration/ (Face registration GUI)")
     print("- dist/AttendanceDashboard/ (Web dashboard)")
     print("- launch_attendance_system.bat (Easy launcher)")
